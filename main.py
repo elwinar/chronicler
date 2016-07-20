@@ -8,20 +8,35 @@ Options:
 """
 import docopt
 import hjson
+import jsonschema
+import chronicle
 
-if __name__ == '__main__':
+
+def main():
     options = docopt.docopt(__doc__)
 
     try:
-        chronicle = open(options['--chronicle'])
+        c = open(options['--chronicle'])
     except FileNotFoundError:
         print("No chronicle to read.")
         exit(1)
 
     try:
-        chronicle = hjson.load(chronicle)
+        c = hjson.load(c)
     except hjson.HjsonDecodeError as e:
         print("This chronicle can't be deciphered.")
         print("L%d, C%d: %s" % (e.lineno, e.colno, e.msg))
         exit(1)
-    print(chronicle)
+
+    try:
+        jsonschema.validate(c, chronicle.schema)
+    except jsonschema.ValidationError as e: 
+        print("This chronicle can't be deciphered.")
+        print("%s: %s" % (list(e.path), e.message))
+        exit(1)
+
+    print("I read the chronicle.")
+
+
+if __name__ == '__main__':
+    main()

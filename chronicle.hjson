@@ -1,0 +1,31 @@
+[
+	{
+		name: Madrak 1 - MK3 Bashing
+		faction: trollbloods
+		caster: Madrak1
+		list:
+			'''
+			Bla bla bla
+			'''
+		against: [
+			{
+				player: Nicolas
+				date: 2016-06-01
+				faction: Cyriss
+				caster: Syntherion1
+				list: 
+					'''
+					Bla bla bla
+					'''
+				result: {
+					victory: true
+					type: assassination
+				}
+				thoughs:
+					'''
+					Bla bla bla
+					'''
+			}
+		]
+	}
+]
