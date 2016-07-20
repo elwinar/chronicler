@@ -35,7 +35,18 @@ def main():
         print("%s: %s" % (list(e.path), e.message))
         exit(1)
 
-    print("I read the chronicle.")
+    print("Behold my story:")
+
+    played = 0
+    won = 0
+    for h in c:
+        for a in h['against']:
+            played += 1
+            if a['result']['victory'] == True:
+                won += 1
+
+    print("victories: %d/%d" % (won, played))
+
 
 
 if __name__ == '__main__':
