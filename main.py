@@ -31,7 +31,7 @@ def main():
     try:
         jsonschema.validate(c, chronicle.schema)
     except jsonschema.ValidationError as e: 
-        print("This chronicle can't be deciphered.")
+        print("This chronicle isn't correctly engraved.")
         print("%s: %s" % (list(e.path), e.message))
         exit(1)
 
