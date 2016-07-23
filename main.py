@@ -3,7 +3,7 @@
 The Chronicler remembers…
 
 Options:
-    -c, --chronicle CHRONICLE   chronicle file to use [default: chronicle.txt]
+    -c, --chronicle CHRONICLE   chronicle file to use [default: chronicle.hjson]
 
 """
 import docopt
