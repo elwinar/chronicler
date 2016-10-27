@@ -6,7 +6,7 @@ The Chronicler remembers…
 
 Options:
     -c --chronicle CHRONICLE     chronicle file to use [default: chronicle.hjson]
-    -q --question QUESTION       question to answer [default: caster]
+    -q --question QUESTION       question to answer [default: player.caster]
 
 """
 import docopt

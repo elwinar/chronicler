@@ -12,15 +12,11 @@ schema = {
           },
           "caster": {
             "type": "string"
-          },
-          "list": {
-            "type": "string"
           }
         },
         "required": [
           "faction",
-          "caster",
-          "list"
+          "caster"
         ]
       },
       "opponent": {
@@ -34,16 +30,12 @@ schema = {
           },
           "caster": {
             "type": "string"
-          },
-          "list": {
-            "type": "string"
           }
         },
         "required": [
           "player",
           "faction",
-          "caster",
-          "list"
+          "caster"
         ]
       },
       "result": {
@@ -60,16 +52,12 @@ schema = {
           "victory",
           "type"
         ]
-      },
-      "thoughs": {
-        "type": "string"
       }
     },
     "required": [
       "player",
       "opponent",
-      "result",
-      "thoughs"
+      "result"
     ]
   }
 }
