@@ -1,6 +1,6 @@
 """Usage: 
-    chronicler [-c CHRONICLE]
-    chronicler [-c CHRONICLE] -q QUESTION
+    ssc [-c CHRONICLE]
+    ssc [-c CHRONICLE] -q QUESTION
 
 The Chronicler remembers…
 
@@ -12,7 +12,6 @@ Options:
 import docopt
 import hjson
 import jsonschema
-import schema
 import tabulate
 
 
@@ -37,7 +36,7 @@ def main():
         exit(1)
 
     try:
-        jsonschema.validate(chronicle, schema.schema)
+        jsonschema.validate(chronicle, schema)
     except jsonschema.ValidationError as e: 
         print("This chronicle isn't correctly engraved.")
         print("%s: %s" % (list(e.path), e.message))
@@ -67,6 +66,70 @@ def main():
 
     print(tabulate.tabulate(response, headers, tablefmt='psql'))
 
+
+schema = {
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "player": {
+        "type": "object",
+        "properties": {
+          "faction": {
+            "type": "string"
+          },
+          "caster": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "faction",
+          "caster"
+        ]
+      },
+      "opponent": {
+        "type": "object",
+        "properties": {
+          "player": {
+            "type": "string"
+          },
+          "faction": {
+            "type": "string"
+          },
+          "caster": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "player",
+          "faction",
+          "caster"
+        ]
+      },
+      "result": {
+        "type": "object",
+        "properties": {
+          "victory": {
+            "type": "boolean"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "victory",
+          "type"
+        ]
+      }
+    },
+    "required": [
+      "player",
+      "opponent",
+      "result"
+    ]
+  }
+}
 
 if __name__ == '__main__':
     main()
