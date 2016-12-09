@@ -12,6 +12,7 @@ Options:
 import docopt
 import hjson
 import jsonschema
+import math
 import tabulate
 
 
@@ -60,9 +61,12 @@ def main():
             answers[key]['won'] += 1
 
     response = []
-    headers = [options['--question'], 'played', 'won']
+    headers = [options['--question'], 'played', 'won', '%']
     for key in sorted(answers.keys()):
-        response.append([key, answers[key]['played'], answers[key]['won']])
+        answer = answers[key]
+        played = answer['played']
+        won = answer['won']
+        response.append([key, played, won, math.trunc(won / played * 100)])
 
     print(tabulate.tabulate(response, headers, tablefmt='psql'))
 
