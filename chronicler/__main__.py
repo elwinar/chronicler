@@ -76,11 +76,17 @@ def main():
 
     response = []
     headers = [options['--question'], 'played', 'won', '%']
+    totals = ['TOTAL', 0, 0, 0]
     for key in sorted(answers.keys()):
         answer = answers[key]
         played = answer['played']
         won = answer['won']
         response.append([key, played, won, math.trunc(won / played * 100)])
+        totals[1] += played
+        totals[2] += won
+
+    totals[3] = math.trunc(totals[2]/totals[1]*100)
+    response.append(totals)
 
     print(tabulate.tabulate(response, headers, tablefmt='psql'))
 
