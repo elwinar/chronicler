@@ -1,12 +1,12 @@
 """Usage: 
-    ssc [-c CHRONICLE]
-    ssc [-c CHRONICLE] -q QUESTION
+    ssc [-c CHRONICLE] [-q QUESTION] [-f FILTERS]
 
 The Chronicler remembers…
 
 Options:
     -c --chronicle CHRONICLE     chronicle file to use [default: chronicle.hjson]
     -q --question QUESTION       question to answer [default: player.caster]
+    -f --filters FILTERS         comma-separated filters to apply
 
 """
 import docopt
@@ -43,12 +43,26 @@ def main():
         print("%s: %s" % (list(e.path), e.message))
         exit(1)
 
-    question = options['--question'].split('.')
+    question = options['--question']
+
+    if options['--filters'] != None:
+        filters = options['--filters'].split(',')
+    else:
+        filters = []
+
     answers = {}
     for game in chronicle:
-        key = game
-        for part in question:
-            key = key[part]
+
+        filtered = False
+        for filter in filters:
+            parts = filter.split('=')
+            if find(game, parts[0]) != parts[1]:
+                filtered = True
+                break
+        if filtered:
+            continue
+
+        key = find(game, question)
 
         if not key in answers:
             answers[key] = {
@@ -70,6 +84,11 @@ def main():
 
     print(tabulate.tabulate(response, headers, tablefmt='psql'))
 
+
+def find(obj, key):
+    for part in key.split('.'):
+        obj = obj[part]
+    return obj
 
 schema = {
   "$schema": "http://json-schema.org/draft-04/schema#",
