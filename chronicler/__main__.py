@@ -14,7 +14,7 @@ import hjson
 import jsonschema
 import math
 import tabulate
-
+import unicodedata
 
 def main():
     try:
@@ -77,7 +77,7 @@ def main():
     response = []
     headers = [options['--question'], 'played', 'won', '%']
     totals = ['TOTAL', 0, 0, 0]
-    for key in sorted(answers.keys()):
+    for key in sorted(answers.keys(), key=normalize):
         answer = answers[key]
         played = answer['played']
         won = answer['won']
@@ -89,6 +89,10 @@ def main():
     response.append(totals)
 
     print(tabulate.tabulate(response, headers, tablefmt='psql'))
+
+
+def normalize(str):
+    return unicodedata.normalize('NFKD', str).encode('ASCII', 'ignore')
 
 
 def find(obj, key):
