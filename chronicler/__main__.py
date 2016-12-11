@@ -1,10 +1,8 @@
-'''Usage: 
-    ssc [-c CHRONICLE] [-q QUESTION] [-f FILTERS]
+'''Usage: ssc CHRONICLE [-q QUESTION] [-f FILTERS]
 
 The Chronicler remembers…
 
 Options:
-    -c --chronicle CHRONICLE     chronicle file to use [default: chronicle.hjson]
     -q --question QUESTION       question to answer [default: player.caster]
     -f --filters FILTERS         comma-separated filters to apply
 
@@ -30,7 +28,7 @@ def main():
 
     # Load the chronicle file.
     try:
-        raw = hjson.load(open(options['--chronicle']))
+        raw = hjson.load(open(options['CHRONICLE']))
         jsonschema.validate(raw, schema)
         chronicle = Chronicle(raw)
     except FileNotFoundError:
