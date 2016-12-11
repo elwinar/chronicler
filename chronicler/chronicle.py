@@ -1,7 +1,11 @@
 from datetime import datetime
+import re
+
+
+DateFormat = '%Y-%m-%d'
+
 
 class Chronicle(object):
-
     def __init__(self, games):
         self.games = []
         for raw in games:
@@ -12,11 +16,18 @@ class Chronicle(object):
 
 
 class Game(object):
-
     def __init__(self, raw):
         self.raw = raw
+        self.date = datetime.strptime(raw['date'], DateFormat).date()
 
     def get(self, path):
+        if path == 'date':
+            return self.date.__str__()
+
+        keys = path.split('.')
+        if keys[0] == 'date':
+            return self.date.strftime(keys[1])
+
         obj = self.raw
         for key in path.split('.'):
             obj = obj[key]
@@ -24,21 +35,14 @@ class Game(object):
 
 
 class Filter(object):
-    DateFormat = '%Y-%m-%d'
-
     def __init__(self, raw):
-        if not raw.startswith('date'):
-            self.path, self.operator, self.value = raw.partition('=')
-        else:
-            self.path = 'date'
-            self.operator = raw[len('date'):len('date')+1]
-            self.value = datetime.strptime(raw[len('date')+1:], self.DateFormat).date()
+            self.path, self.operator, self.value = re.findall(r"(.*)([=<>])(.*)", raw)[0]
 
     def match(self, game):
         if not self.path == 'date':
             return self.value == game.get(self.path)
         else:
-            value = datetime.strptime(game.get('date'), self.DateFormat).date()
+            value = game.get('date')
             if self.operator == '=':
                 return value == self.value
             elif self.operator == '<':
