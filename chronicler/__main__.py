@@ -16,8 +16,8 @@ import math
 import tabulate
 import unicodedata
 
-from chronicle import Chronicle, Game, Filter
-from schema import schema
+from chronicler.chronicle import Chronicle, Game, Filter
+from chronicler.schema import schema
 
 def main():
 
