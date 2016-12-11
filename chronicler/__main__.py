@@ -1,10 +1,62 @@
-'''Usage: ssc CHRONICLE [-q QUESTION] [-f FILTERS]
+'''Usage: ssc FILE [-g GROUP] [-f FILTERS]
 
-The Chronicler remembers…
 
 Options:
-    -q --question QUESTION       question to answer [default: player.caster]
-    -f --filters FILTERS         comma-separated filters to apply
+    -g --group GROUP       group to display [default: player.caster]
+    -f --filters FILTERS   comma-separated filters to apply
+
+
+Description:
+
+ssc is a game tracker for Warmachine/Horde. It displays statistics about a set of games, eventually filtering them using the filter syntax.
+
+Games are grouped using one of the attributes of the game object, specified as the path to the said attribute. By default, the group is `player.caster`.
+
+Filters are a comma-separated list of items, each item described as `<path>=<value>`. Games included in the result set must match all filters.
+
+Special cases are handled for dates:
+    - Dates are added virtual attributes corresponding to the format to represent the date with, following the python strftime format (see http://strftime.org),
+    - Date filters can be compared using '<' and '>' operators in addition of '=';
+
+
+File format:
+
+    [
+        {
+            player: {
+                faction: FACTION
+                caster: CASTER
+            }
+            opponent: {
+                player: PLAYER
+                faction: FACTION
+                caster: CASTER
+            }
+            date: %Y-%m-%d
+            result: {
+                victory: true|false
+                type: TYPE
+            }
+        }
+    ]
+
+
+Examples:
+
+`ssc chronicle.hjson -g "player.caster"` will display the statistics for each caster played (its the default command).
+
+`ssc chronicle.hjson -g "player.caster" -f player.faction=Trollbloods"` will display the statistics for each caster for games where the player played a Trollbloods list.
+
+`ssc chronicle.hjson -g "opponent.faction"` will display the statistics for each faction played against.
+
+`ssc chronicle.hjson -g "result.type"` will display the statistics for each victory condition.
+
+`ssc chronicle.hjson -g "date.%Y-%m"` will display the statistics for each month.
+
+`ssc chronicle.hjson -f "date>2016-10-15,date<2016-11-15"` will display the statistics for games that occured between 2016-10-15 and 2016-11-15.
+
+`ssc chronicle.hjson -f "date.%Y-%m=2016-11"` will display games played in 2016-11.
+
 
 '''
 import docopt
@@ -28,7 +80,7 @@ def main():
 
     # Load the chronicle file.
     try:
-        raw = hjson.load(open(options['CHRONICLE']))
+        raw = hjson.load(open(options['FILE']))
         jsonschema.validate(raw, schema)
         chronicle = Chronicle(raw)
     except FileNotFoundError:
@@ -44,8 +96,7 @@ def main():
         exit(1)
 
     # Get the question to answer and the filters to apply.
-    question = options['--question']
-
+    group = options['--group']
     filters = []
     if options['--filters'] != None:
         for raw in options['--filters'].split(','):
@@ -54,7 +105,7 @@ def main():
     # Get the games matching the filters.
     answers = {}
     for game in chronicle.filter(filters):
-        key = game.get(question)
+        key = game.get(group)
         if not key in answers:
             answers[key] = {
                     'played': 0,
@@ -71,7 +122,7 @@ def main():
 
     # Compute the response.
     response = []
-    headers = [options['--question'], 'played', 'won', '%']
+    headers = [group, 'played', 'won', '%']
     totals = ['TOTAL', 0, 0, 0]
     for key in sorted(answers.keys(), key=normalize):
         answer = answers[key]
