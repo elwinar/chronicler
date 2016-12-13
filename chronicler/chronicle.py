@@ -40,7 +40,7 @@ class Filter(object):
 
     def match(self, game):
         if not self.path == 'date':
-            return self.value == game.get(self.path)
+            return self.value.lower() == game.get(self.path).lower()
         else:
             value = game.get('date')
             if self.operator == '=':
