@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="chronicler",
-    version="2.1.0",
+    version="2.2.0",
     description="Game tracker for Warmachine",
     url="http://github.com/elwinar/chronicler",
     author="Romain Baugue",

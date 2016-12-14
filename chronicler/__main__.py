@@ -10,7 +10,7 @@ Description:
 
 ssc is a game tracker for Warmachine/Horde. It displays statistics about a set of games, eventually filtering them using the filter syntax.
 
-Games are grouped using one of the attributes of the game object, specified as the path to the said attribute. By default, the group is `player.caster`.
+Games are grouped using a comma-separated list of item, each item bescribed as `<path>`. The statistics of each group will be computed and displayed as result.
 
 Filters are a comma-separated list of items, each item described as `<path>=<value>`. Games included in the result set must match all filters.
 
@@ -65,8 +65,11 @@ import jsonschema
 import math
 import tabulate
 import unicodedata
+import itertools
+import operator
 
-from chronicler.chronicle import Chronicle, Game, Filter, Groups
+from chronicler.chronicle import Chronicle, Game
+from chronicler.filter import Filter
 from chronicler.schema import schema
 
 def main():
@@ -109,21 +112,25 @@ def main():
         print('There is no battle like this.')
         exit(0)
 
-    # Split the games in groups.
-    groups = Groups(options['--groups'].split(','), games)
-
-    # For each group, compute the statistics.
-    headers = ['group', 'played', 'won', '%']
+    # Aggregate the games in groups.
+    groups = options['--groups'].split(',')
+    grouper = operator.itemgetter(groups)
     results = []
-    totalPlayed, totalWon = 0, 0
-    for key in sorted(groups.keys(), key=normalize):
-        played, won = groups.compute(key)
-        results.append([key, played, won, math.trunc(won/played*100)])
-        totalPlayed += played
-        totalWon += won
-    results.append(['TOTAL', totalPlayed, totalWon, math.trunc(totalWon/totalPlayed*100)])
+    totalPlayed = 0
+    totalWon = 0
+    for key, games in itertools.groupby(sorted(games, key=grouper), grouper):
+        played = 0
+        won = 0
+        for game in games:
+            played += 1
+            totalPlayed += 1
+            won += int(game['result.victory'])
+            totalWon += int(game['result.victory'])
+        results.append(key + [played, won, math.trunc(won/played*100)])
+    results.append(['TOTAL'] + ['' for i in groups[1:]] + [totalPlayed, totalWon, math.trunc(totalWon/totalPlayed*100)])
 
     # Print the results.
+    headers = groups + ['played', 'won', '%']
     print(tabulate.tabulate(results, headers, tablefmt='psql'))
 
 

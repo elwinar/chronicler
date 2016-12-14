@@ -1,6 +1,4 @@
 from datetime import datetime
-import math
-import re
 
 
 DateFormat = '%Y-%m-%d'
@@ -34,35 +32,10 @@ class Game(object):
             obj = obj[key]
         return obj
 
+    def __getitem__(self, key):
+        if not isinstance(key, list):
+            return self.get(key)
 
-class Filter(object):
-    def __init__(self, raw):
-            self.path, self.operator, self.value = re.findall(r"(.*)([=<>])(.*)", raw)[0]
-
-    def match(self, game):
-        if not self.path == 'date':
-            return self.value.lower() == game.get(self.path).lower()
-        else:
-            value = game.get('date')
-            if self.operator == '=':
-                return value == self.value
-            elif self.operator == '<':
-                return value < self.value
-            elif self.operator == '>':
-                return value > self.value
-            else:
-                raise ValueError('unhandled operator '+self.operator)
+        return [self.get(k) for k in key]
 
 
-class Groups(dict):
-    def __init__(self, groups, games):
-        self.group = groups.pop(0)
-
-        for game in games:
-            key = game.get(self.group)
-            if not key in self:
-                self[key] = []
-            self[key].append(game)
-
-    def compute(self, key):
-        return len(self[key]), sum(1 for game in self[key] if game.get('result.victory'))
