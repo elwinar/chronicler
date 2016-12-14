@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 import re
 
 
@@ -12,7 +13,7 @@ class Chronicle(object):
             self.games.append(Game(raw))
 
     def filter(self, filters):
-        return filter(lambda g: all(f.match(g) for f in filters), self.games)
+        return list(filter(lambda g: all(f.match(g) for f in filters), self.games))
 
 
 class Game(object):
@@ -52,3 +53,16 @@ class Filter(object):
             else:
                 raise ValueError('unhandled operator '+self.operator)
 
+
+class Groups(dict):
+    def __init__(self, groups, games):
+        self.group = groups.pop(0)
+
+        for game in games:
+            key = game.get(self.group)
+            if not key in self:
+                self[key] = []
+            self[key].append(game)
+
+    def compute(self, key):
+        return len(self[key]), sum(1 for game in self[key] if game.get('result.victory'))

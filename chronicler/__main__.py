@@ -2,7 +2,7 @@
 
 
 Options:
-    -g --group GROUP       group to display [default: player.caster]
+    -g --groups GROUPS     comma-separated groups to display [default: player.caster]
     -f --filters FILTERS   comma-separated filters to apply
 
 
@@ -66,7 +66,7 @@ import math
 import tabulate
 import unicodedata
 
-from chronicler.chronicle import Chronicle, Game, Filter
+from chronicler.chronicle import Chronicle, Game, Filter, Groups
 from chronicler.schema import schema
 
 def main():
@@ -95,47 +95,36 @@ def main():
         print('%s: %s' % (list(e.path), e.message))
         exit(1)
 
-    # Get the question to answer and the filters to apply.
-    group = options['--group']
+    # Get the filters to apply.
     filters = []
     if options['--filters'] != None:
         for raw in options['--filters'].split(','):
             filters.append(Filter(raw))
 
     # Get the games matching the filters.
-    answers = {}
-    for game in chronicle.filter(filters):
-        key = game.get(group)
-        if not key in answers:
-            answers[key] = {
-                    'played': 0,
-                    'won': 0
-                }
-        answers[key]['played'] += 1
-        if game.get('result.victory'):
-            answers[key]['won'] += 1
+    games = chronicle.filter(filters)
 
     # Early exit if there is no game.
-    if len(answers) == 0:
+    if len(games) == 0:
         print('There is no battle like this.')
         exit(0)
 
-    # Compute the response.
-    response = []
-    headers = [group, 'played', 'won', '%']
-    totals = ['TOTAL', 0, 0, 0]
-    for key in sorted(answers.keys(), key=normalize):
-        answer = answers[key]
-        played = answer['played']
-        won = answer['won']
-        response.append([key, played, won, math.trunc(won / played * 100)])
-        totals[1] += played
-        totals[2] += won
-    totals[3] = math.trunc(totals[2]/totals[1]*100)
-    response.append(totals)
+    # Split the games in groups.
+    groups = Groups(options['--groups'].split(','), games)
 
-    # Print the response.
-    print(tabulate.tabulate(response, headers, tablefmt='psql'))
+    # For each group, compute the statistics.
+    headers = ['group', 'played', 'won', '%']
+    results = []
+    totalPlayed, totalWon = 0, 0
+    for key in sorted(groups.keys(), key=normalize):
+        played, won = groups.compute(key)
+        results.append([key, played, won, math.trunc(won/played*100)])
+        totalPlayed += played
+        totalWon += won
+    results.append(['TOTAL', totalPlayed, totalWon, math.trunc(totalWon/totalPlayed*100)])
+
+    # Print the results.
+    print(tabulate.tabulate(results, headers, tablefmt='psql'))
 
 
 def normalize(str):
