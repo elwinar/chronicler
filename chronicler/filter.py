@@ -6,10 +6,8 @@ class Filter(object):
             self.path, self.operator, self.value = re.findall(r"(.*)([=<>])(.*)", raw)[0]
 
     def match(self, game):
-        if not self.path == 'date':
-            return self.value.lower() == game[self.path].lower()
-        else:
-            value = game['date']
+        value = game[self.path]
+        if self.path == 'date':
             if self.operator == '=':
                 return value == self.value
             elif self.operator == '<':
@@ -18,3 +16,11 @@ class Filter(object):
                 return value > self.value
             else:
                 raise ValueError('unhandled operator '+self.operator)
+        else:
+            if isinstance(value, bool):
+                return toBool(self.value) == value
+            else:
+                return self.value.lower() == game[self.path].lower()
+
+def toBool(value):
+    return value in ['true', 'True', '1', 't', 'T', 'y', 'Y']
